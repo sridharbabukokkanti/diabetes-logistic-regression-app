@@ -1,15 +1,39 @@
-import joblib
+cd "/Users/sridharbabukokkanti/Assesment"
+
+cat << 'EOF' > app.py
 import numpy as np
 import pandas as pd
 import streamlit as st
+from sklearn.model_selection import train_test_split
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LogisticRegression
 
 st.set_page_config(page_title="Diabetes Risk Predictor", page_icon="🩺", layout="centered")
 
 @st.cache_resource
-def load_model():
-    return joblib.load("diabetes_logreg_pipeline.joblib")
+def load_or_train_model():
+    df = pd.read_csv("diabetes.csv")
+    zero_missing_cols = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
+    df[zero_missing_cols] = df[zero_missing_cols].replace(0, np.nan)
 
-model = load_model()
+    X = df.drop(columns=['Outcome'])
+    y = df['Outcome']
+
+    X_train, _, y_train, _ = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
+    )
+
+    pipeline = Pipeline(steps=[
+        ('imputer', SimpleImputer(strategy='median')),
+        ('scaler', StandardScaler()),
+        ('classifier', LogisticRegression(random_state=42, max_iter=1000))
+    ])
+    pipeline.fit(X_train, y_train)
+    return pipeline
+
+model = load_or_train_model()
 
 st.title("🩺 Diabetes Risk Prediction App")
 st.markdown("Enter patient diagnostic measurements below to estimate the probability of **Type 2 Diabetes**.")
@@ -57,3 +81,4 @@ if st.button("Predict Diabetes Risk", type="primary", use_container_width=True):
         st.error(f"**High Risk (Outcome = 1):** Probability ({prob:.1%}) >= {threshold:.0%}")
     else:
         st.success(f"**Low Risk (Outcome = 0):** Probability ({prob:.1%}) < {threshold:.0%}")
+EOF
