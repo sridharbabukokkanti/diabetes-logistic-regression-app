@@ -1,5 +1,3 @@
-
-cat << 'EOF' > app.py
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -80,4 +78,3 @@ if st.button("Predict Diabetes Risk", type="primary", use_container_width=True):
         st.error(f"**High Risk (Outcome = 1):** Probability ({prob:.1%}) >= {threshold:.0%}")
     else:
         st.success(f"**Low Risk (Outcome = 0):** Probability ({prob:.1%}) < {threshold:.0%}")
-EOF
