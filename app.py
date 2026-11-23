@@ -1,4 +1,3 @@
-cd "/Users/sridharbabukokkanti/Assesment"
 
 cat << 'EOF' > app.py
 import numpy as np
